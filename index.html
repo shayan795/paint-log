@@ -165,6 +165,8 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
 .vrecipe-procs{display:flex;flex-direction:column;gap:5px}
 .vrecipe-proc-label{font-size:.66rem;color:var(--sub);font-weight:500;margin-bottom:1px}
 .vrecipe-chip{width:12px;height:12px;border:1px solid rgba(0,0,0,.18);flex:none;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:7px}
+.vr-left{display:inline}              /* PCではチップのみ表示(工程名は表ヘッダにある) */
+.vr-proc{display:none}
 .vrecipe-name{display:inline-block;vertical-align:middle}
 .vrecipe-pname{font-size:.8rem;color:var(--ink);line-height:1.2}
 .vrecipe-pcode{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--sub)}
@@ -189,10 +191,12 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
   .vrecipe-table td:last-child{border-bottom:none}
   .vrecipe-table td.vr-part{font-size:1rem;font-weight:700;background:var(--bp-bg);border-bottom:1px solid var(--line);padding:11px 14px;display:block;
     border-left:none;min-width:0;width:auto;position:static;white-space:normal}  /* PC用残留スタイルを打ち消す(赤線の二重・部位名左の余白を解消。赤線はカードtrの1本だけ) */
-  .vrecipe-table td[data-label]::before{content:attr(data-label);font-size:.68rem;color:var(--sub);font-weight:600;flex:none;text-align:left}
-  .vrecipe-table td.vr-cell{gap:8px}                          /* 四角=工程ラベルの右隣(左)に固定、塗料名は右へ寄せる */
-  .vrecipe-table td .vrecipe-chip{margin-right:0}
-  .vrecipe-table td .vrecipe-name{margin-left:auto;text-align:right}
+  .vrecipe-table td.vrecipe-empty[data-label]::before{content:attr(data-label);font-size:.68rem;color:var(--sub);font-weight:600;flex:none;text-align:left}
+  /* チップ＋工程名を左に固定、塗料名を右へ */
+  .vrecipe-table td.vr-cell .vr-left{display:flex;align-items:center;gap:8px;flex:none}
+  .vrecipe-table td.vr-cell .vrecipe-chip{margin-right:0}
+  .vrecipe-table td.vr-cell .vr-proc{display:inline;font-size:.68rem;color:var(--sub);font-weight:600}
+  .vrecipe-table td.vr-cell .vrecipe-name{text-align:right}
   .vrecipe-table td.vrecipe-empty{display:none}
   .vrecipe-table tr.vr-comment-row{display:none}            /* PC用の独立行はスマホでは隠す */
   .vrecipe-table td.vr-comment-cell{display:block;padding:10px 14px;border-bottom:none}  /* カード内に表示 */
@@ -1893,7 +1897,7 @@ function renderViewMode(){
         const p = c.i !== undefined ? PAINTS[c.i] : null;
         const buyName = p ? (p[0]+" "+p[1]+" "+p[2]).replace(/\s+/g," ").trim() : c.c;
         html += `<td class="vr-cell" data-label="${esc(proc.name)}">
-          <span class="vrecipe-chip" style="background:${p?p[3]:'#ddd'}"></span>
+          <span class="vr-left"><span class="vrecipe-chip" style="background:${p?p[3]:'#ddd'}"></span><span class="vr-proc">${esc(proc.name)}</span></span>
           <span class="vrecipe-name">
             <span class="vrecipe-pname">${esc(p?p[2]:c.c)}</span>
             <span class="vrecipe-pcode">${p?esc((p[0]+" "+p[1]).trim()):""}</span>
