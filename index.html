@@ -249,6 +249,9 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
 .about-hero .ah-logo::before{content:"";width:18px;height:18px;background:var(--accent);border-radius:50%}
 .about-hero .ah-tag{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:var(--sub);margin-top:10px}
 .about-lead{font-size:1.05rem;line-height:1.9;margin:26px 0;font-weight:500}
+.share-tweet-btn{display:inline-block;font-family:inherit;font-size:.95rem;font-weight:700;padding:11px 22px;background:#000;color:#fff;border-radius:10px;text-decoration:none;cursor:pointer}
+.share-tweet-btn:hover{background:#222}
+#shareReady{margin:4px 0 2px;padding:12px;border:1px solid var(--line-d);border-left:3px solid var(--accent);background:#fff}
 .about-start{margin:0 0 28px}
 .about-start button{font-family:inherit;font-size:1rem;font-weight:700;width:100%;padding:15px;background:var(--accent);border:none;border-radius:12px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(216,68,46,.28);transition:transform .12s,box-shadow .12s}
 .about-start button:active{transform:translateY(1px)}
@@ -470,6 +473,11 @@ td.rowphoto{text-align:center;vertical-align:middle}
     <button class="primary" id="saveLocal">この端末に保存</button>
     <button id="copyUrl">URLをコピー</button>
     <button id="shareX">Xで共有</button>
+  </div>
+  <div id="shareReady" style="display:none">
+    <a id="shareTweet" class="share-tweet-btn" rel="noopener">𝕏 でポストする</a>
+    <button id="shareCopy" class="small ghost" style="margin-left:8px">URLをコピー</button>
+    <p class="note" style="margin-top:6px">保存しました。上のボタンをタップするとXアプリが開きます。</p>
   </div>
   <div class="savedlist" id="savedList"></div>
   <p class="note" style="margin-top:8px">端末保存はこのブラウザ内のみです。大事なレシピは共有URLを控えておいてください。</p>
@@ -1512,15 +1520,23 @@ document.getElementById("copyUrl").onclick = async (e) => {
   } catch (_) { alert("保存に失敗しました。通信環境を確認してもう一度お試しください。"); }
   finally { btn.disabled = false; btn.textContent = old; }
 };
+let _shareUrl = null;
 document.getElementById("shareX").onclick = async (e) => {
   const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
   try {
     const { url } = await saveToServer();
+    _shareUrl = url;
     const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
     const tw = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
-    // 中間タブを挟まず現在のタブをそのままX intentへ遷移 → スマホはXアプリ(ログイン済み)が起動
-    window.location.href = tw;
-  } catch (_) { alert("保存に失敗しました。もう一度お試しください。"); btn.disabled = false; btn.textContent = old; }
+    // 実アンカーを表示 → ユーザーのタップ(直接ジェスチャー)でXアプリが起動する
+    const a = document.getElementById("shareTweet");
+    a.href = tw;
+    document.getElementById("shareReady").style.display = "block";
+  } catch (_) { alert("保存に失敗しました。もう一度お試しください。"); }
+  finally { btn.disabled = false; btn.textContent = old; }
+};
+document.getElementById("shareCopy").onclick = () => {
+  if (_shareUrl) copyText(_shareUrl, "共有URLをコピーしました。");
 };
 
 /* ===================== レシピカード画像(D案:写真メイン+色グループ) ===================== */
