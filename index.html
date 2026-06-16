@@ -467,7 +467,7 @@ td.rowphoto{text-align:center;vertical-align:middle}
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="shareCard">
   <h2>保存・共有</h2>
   <div class="toolbar" style="margin:0 0 10px">
     <button class="primary" id="saveLocal">この端末に保存</button>
@@ -1513,7 +1513,7 @@ async function saveToServer(){
 }
 
 document.getElementById("copyUrl").onclick = async (e) => {
-  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
+  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "少々お待ちください…";
   try {
     const { url } = await saveToServer();
     await copyText(url, "共有URLをコピーしました。Xや作品と一緒に貼れます。");
@@ -1521,16 +1521,53 @@ document.getElementById("copyUrl").onclick = async (e) => {
   finally { btn.disabled = false; btn.textContent = old; }
 };
 let _shareUrl = null;
+function tweetIntent(url){
+  const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
+  return "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
+}
+// 共有対象の中身が変わったか判定するための署名
+function shareSig(){
+  return JSON.stringify({
+    k: state.kit, a: state.author, m: state.memo,
+    pc: state.procs.map(p => p.id + ":" + p.name),
+    r: state.rows.map(r => ({ p: r.part, c: r.cells, cm: r.comment, ph: !!r.photo })),
+    ph: (state.photos || []).map(x => typeof x === "string" ? x.length : 0),
+  });
+}
+function hasShareContent(){
+  return (state.kit && state.kit.trim()) ||
+         state.rows.some(r => (r.part && r.part.trim()) || Object.keys(r.cells || {}).length);
+}
+// 裏で先に保存しておく(共有エリアが見えたタイミングで実行)
+let _warm = { sig: null, url: null, pending: false };
+async function warmShare(){
+  if (!hasShareContent() || _warm.pending) return;
+  const sig = shareSig();
+  if (_warm.url && _warm.sig === sig) return;   // 既に最新を保存済み
+  _warm.pending = true;
+  try { const { url } = await saveToServer(); _warm = { sig, url, pending: false }; }
+  catch (_) { _warm.pending = false; }
+}
+const _shareCard = document.getElementById("shareCard");
+if (_shareCard && "IntersectionObserver" in window){
+  new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) warmShare(); }),
+    { rootMargin: "250px" }).observe(_shareCard);
+}
+
 document.getElementById("shareX").onclick = async (e) => {
-  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
+  const sig = shareSig();
+  // 準備済み(裏で保存済み)なら、同期遷移でXアプリを一発起動
+  if (_warm.url && _warm.sig === sig){
+    _shareUrl = _warm.url;
+    window.location.href = tweetIntent(_warm.url);
+    return;
+  }
+  // まだ保存が間に合っていない → その場で保存し、タップ式リンクを表示
+  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "少々お待ちください…";
   try {
     const { url } = await saveToServer();
-    _shareUrl = url;
-    const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
-    const tw = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
-    // 実アンカーを表示 → ユーザーのタップ(直接ジェスチャー)でXアプリが起動する
-    const a = document.getElementById("shareTweet");
-    a.href = tw;
+    _warm = { sig, url, pending: false }; _shareUrl = url;
+    document.getElementById("shareTweet").href = tweetIntent(url);
     document.getElementById("shareReady").style.display = "block";
   } catch (_) { alert("保存に失敗しました。もう一度お試しください。"); }
   finally { btn.disabled = false; btn.textContent = old; }
