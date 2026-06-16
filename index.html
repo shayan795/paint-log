@@ -409,8 +409,8 @@ td.rowphoto{text-align:center;vertical-align:middle}
   </div>
   <div style="margin-top:12px">
     <label style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:4px;display:block">制作コメント <span style="font-weight:400;color:var(--sub);font-size:.76rem">— 塗装のこだわりや工夫を残そう(任意)</span></label>
-    <textarea id="memo" rows="4" placeholder="例: 全体的にハイライトをエアブラシで吹き、シャドウはグレーで手描きしました。フレームはガンメタル一発塗りで省エネ仕上げ。希釈はMr.カラーうすめ液1:1.5、0.3mmで吹付け。"></textarea>
-    <p class="note" style="margin-top:4px">ここに書いた内容は共有リンクを開いた人にも表示されます。製作の思いや方法を自由に書いてください。</p>
+    <textarea id="memo" rows="4" placeholder="例: フレームはガンメタル一発塗りで省エネ仕上げ。"></textarea>
+    <p class="note" style="margin-top:4px">製作の思いや方法を自由に書いてください。</p>
   </div>
   <div style="margin-top:12px">
     <label>完成写真(最大2枚・任意・端末内でのみ処理されます)</label>
@@ -420,12 +420,11 @@ td.rowphoto{text-align:center;vertical-align:middle}
       <button class="small ghost" id="photoClear" style="display:none">全部削除</button>
       <div class="photo-preview" id="photoPreview"></div>
     </div>
-    <p class="note" style="margin-top:4px">縦向き・横向きはそのまま保たれます。高画質でも自動で最適化されるので、そのまま選んでOK。</p>
   </div>
 </div>
 
 <div class="card">
-  <h2>塗装レシピ — 行=色のまとまり、列=工程</h2>
+  <h2>塗装レシピ</h2>
   <div class="proc-panel" id="procPanel"></div>
   <div class="scroll"><table class="recipe" id="recipeTable"></table></div>
   <div class="toolbar" style="margin-bottom:0">
