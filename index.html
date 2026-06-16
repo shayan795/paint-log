@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>塗装レシピ録 — ガンプラ・模型の塗料記録ツール</title>
 <meta name="description" content="どのパーツに・どの塗料を・どの順番で塗ったかを記録。レシピはURLで共有でき、使った塗料はそのまま買い足せる。">
-<!-- OGP / Twitter Card -->
+<!-- OGP / Twitter Card --><!--OG_START-->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="塗装レシピ録 / Paint Log">
 <meta property="og:title" content="塗装レシピ録 — ガンプラ・模型の塗料記録ツール">
@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="塗装レシピ録 — ガンプラ・模型の塗料記録ツール">
 <meta name="twitter:description" content="塗装レシピを記録して、URL一つで共有できる無料ツール。">
-<meta name="twitter:image" content="https://plamo-paint.com/og-image.png">
+<meta name="twitter:image" content="https://plamo-paint.com/og-image.png"><!--OG_END-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -1480,16 +1480,43 @@ function decodeState(s){
   s = s.replace(/-/g,"+").replace(/_/g,"/");
   return migrate(JSON.parse(decodeURIComponent(escape(atob(s)))));
 }
-function recipeUrl(){ return SITE_URL + "#r=" + encodeState(); }
+function recipeUrl(){ return SITE_URL + "#r=" + encodeState(); }   // 旧・URL埋め込み(後方互換の保険)
 async function copyText(t, msg){
   try{ await navigator.clipboard.writeText(t); alert(msg); }
   catch(_){ prompt("このURLをコピーしてください", t); }
 }
-document.getElementById("copyUrl").onclick = () =>
-  copyText(recipeUrl(), "URLをコピーしました。開くと閲覧ページが表示され、上部のタブで編集にも切り替えられます。");
-document.getElementById("shareX").onclick = () => {
-  const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
-  window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(recipeUrl()), "_blank");
+
+/* ===== サーバー保存(短縮URL+レシピ別OGP) ===== */
+const API_BASE = location.origin;
+function cardDataUrl(theme){ return new Promise(res => generateCardUrl(theme, res)); }
+async function saveToServer(){
+  const card = await cardDataUrl("dark");           // OG用カード画像(写真2枚から生成)
+  const r = await fetch(API_BASE + "/api/save", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ state, card }),          // 写真込みのstateを送信(サーバー側でR2へ逃がす)
+  });
+  if (!r.ok) throw new Error("save failed " + r.status);
+  return r.json();                                  // {id, url}
+}
+
+document.getElementById("copyUrl").onclick = async (e) => {
+  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
+  try {
+    const { url } = await saveToServer();
+    await copyText(url, "共有URLをコピーしました。Xや作品と一緒に貼れます。");
+  } catch (_) { alert("保存に失敗しました。通信環境を確認してもう一度お試しください。"); }
+  finally { btn.disabled = false; btn.textContent = old; }
+};
+document.getElementById("shareX").onclick = async (e) => {
+  const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
+  const w = window.open("about:blank", "_blank");   // ポップアップブロック回避のため先に開く
+  try {
+    const { url } = await saveToServer();
+    const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
+    const tw = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
+    if (w) w.location.href = tw; else window.open(tw, "_blank");
+  } catch (_) { if (w) w.close(); alert("保存に失敗しました。もう一度お試しください。"); }
+  finally { btn.disabled = false; btn.textContent = old; }
 };
 
 /* ===================== レシピカード画像(D案:写真メイン+色グループ) ===================== */
@@ -1981,8 +2008,22 @@ document.getElementById("tabEditActive").onclick = () => { /* 既に編集中 */
 /* ===================== 起動(モード振り分け) ===================== */
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 (function boot(){
+  // 短縮URL /r/:id — サーバーからレシピを読み込んで閲覧表示
+  const pm = location.pathname.match(/^\/r\/([A-Za-z0-9]+)/);
+  if (pm){
+    document.getElementById("editMode").style.display = "none";
+    fetch(API_BASE + "/api/recipe/" + pm[1])
+      .then(r => { if(!r.ok) throw 0; return r.json(); })
+      .then(rec => {
+        if (rec && rec.state){ state = migrate(rec.state); currentPage = "view"; renderViewMode();
+          document.getElementById("editMode").style.display = "none"; }
+        else showPage("about");
+      })
+      .catch(() => showPage("about"));
+    return;
+  }
   const hash = location.hash;
-  const mr = hash.match(/#r=([\w\-]+)/);   // 共有URL(開くと閲覧、ナビで編集へ)
+  const mr = hash.match(/#r=([\w\-]+)/);   // 旧・共有URL(後方互換: URL埋め込み)
   const me = hash.match(/#e=([\w\-]+)/);   // 旧・編集用URL(後方互換: 直接編集モード)
   if (mr){
     try{ state = decodeState(mr[1]); currentPage = "view"; renderViewMode();
