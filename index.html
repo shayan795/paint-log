@@ -164,13 +164,13 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
 .vrecipe-table td:first-child{font-weight:700;font-size:.8rem;padding-left:12px;border-left:3px solid var(--accent);white-space:nowrap;width:1%}
 .vrecipe-procs{display:flex;flex-direction:column;gap:5px}
 .vrecipe-proc-label{font-size:.66rem;color:var(--sub);font-weight:500;margin-bottom:1px}
-.vrecipe-chip-line{display:flex;align-items:center;gap:6px}
-.vrecipe-chip{width:12px;height:12px;border:1px solid rgba(0,0,0,.18);flex:none;border-radius:2px}
+.vrecipe-chip{width:12px;height:12px;border:1px solid rgba(0,0,0,.18);flex:none;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:7px}
+.vrecipe-name{display:inline-block;vertical-align:middle}
 .vrecipe-pname{font-size:.8rem;color:var(--ink);line-height:1.2}
 .vrecipe-pcode{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--sub)}
 .vrecipe-empty{color:var(--line-d);font-size:.78rem}
 .vr-cell{cursor:pointer}
-.vr-buylinks{display:none;gap:5px;flex-wrap:wrap;margin-top:8px}
+.vr-buylinks{display:none;gap:5px;flex-wrap:wrap;margin-top:8px;flex-basis:100%}
 .vr-cell.open .vr-buylinks{display:flex}
 /* 色グループのコメント。長文は3行で省略し、タップで全文表示 */
 .vr-comment-cell{display:none}  /* スマホ用セル。PCでは独立行(.vr-comment-row)を使う */
@@ -185,12 +185,14 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
   .vrecipe-table thead{display:none}
   .vrecipe-table, .vrecipe-table tbody, .vrecipe-table tr, .vrecipe-table td{display:block;width:100%}
   .vrecipe-table tr{border:1px solid var(--line-d);border-left:3px solid var(--accent);margin-bottom:14px;background:#fff}
-  .vrecipe-table td{border:none;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+  .vrecipe-table td{border:none;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px}
   .vrecipe-table td:last-child{border-bottom:none}
   .vrecipe-table td.vr-part{font-size:1rem;font-weight:700;background:var(--bp-bg);border-bottom:1px solid var(--line);padding:11px 14px;display:block;
     border-left:none;min-width:0;width:auto;position:static;white-space:normal}  /* PC用残留スタイルを打ち消す(赤線の二重・部位名左の余白を解消。赤線はカードtrの1本だけ) */
   .vrecipe-table td[data-label]::before{content:attr(data-label);font-size:.68rem;color:var(--sub);font-weight:600;flex:none;text-align:left}
-  .vrecipe-table td .vrecipe-chip-line{justify-content:flex-end;text-align:right}
+  .vrecipe-table td.vr-cell{gap:8px}                          /* 四角=工程ラベルの右隣(左)に固定、塗料名は右へ寄せる */
+  .vrecipe-table td .vrecipe-chip{margin-right:0}
+  .vrecipe-table td .vrecipe-name{margin-left:auto;text-align:right}
   .vrecipe-table td.vrecipe-empty{display:none}
   .vrecipe-table tr.vr-comment-row{display:none}            /* PC用の独立行はスマホでは隠す */
   .vrecipe-table td.vr-comment-cell{display:block;padding:10px 14px;border-bottom:none}  /* カード内に表示 */
@@ -244,7 +246,8 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
 .about-hero .ah-tag{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:var(--sub);margin-top:10px}
 .about-lead{font-size:1.05rem;line-height:1.9;margin:26px 0;font-weight:500}
 .about-start{margin:0 0 28px}
-.about-start button{font-family:inherit;font-size:1rem;font-weight:700;width:100%;padding:15px;background:var(--accent);border:none;color:#fff;cursor:pointer}
+.about-start button{font-family:inherit;font-size:1rem;font-weight:700;width:100%;padding:15px;background:var(--accent);border:none;border-radius:12px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(216,68,46,.28);transition:transform .12s,box-shadow .12s}
+.about-start button:active{transform:translateY(1px)}
 .about-start button:hover{background:#b83322}
 .about-sec{margin:24px 0}
 .about-sec h3{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
@@ -358,7 +361,7 @@ td.rowphoto{text-align:center;vertical-align:middle}
   </div>
   <div class="about-sec">
     <h3>データの扱い</h3>
-    <p>レシピのデータはURLに埋め込まれる形で共有されます。完成写真も共有リンクに含まれ、誰でも閲覧できます。ログインは不要です。</p>
+    <p>「共有」するとレシピと写真がオンラインに保存され、短いURLが発行されます。そのURLを知っている人は誰でも閲覧できます（ログイン不要）。</p>
   </div>
   <div class="v-cta">
     <div style="font-weight:700;font-size:1rem">さっそく記録してみる</div>
@@ -405,7 +408,7 @@ td.rowphoto{text-align:center;vertical-align:middle}
   <h2>作品情報</h2>
   <div class="row">
     <div><label>キット名</label><input id="kit" placeholder="例: HG ガンダムエアリアル"></div>
-    <div><label>制作者名 または X(Twitter)ユーザーID(任意)</label><input id="author" placeholder="例: @your_name(@付きで入れるとXに飛べます)"></div>
+    <div><label>制作者名 または X(Twitter)ユーザーID(任意)</label><input id="author" placeholder="例: @your_name"></div>
   </div>
   <div style="margin-top:12px">
     <label style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:4px;display:block">制作コメント <span style="font-weight:400;color:var(--sub);font-size:.76rem">— 塗装のこだわりや工夫を残そう(任意)</span></label>
@@ -430,7 +433,6 @@ td.rowphoto{text-align:center;vertical-align:middle}
   <div class="toolbar" style="margin-bottom:0">
     <button class="small" id="addRow">+ 色グループを追加</button>
     <button class="small" id="addCol">+ 工程列を追加</button>
-    <span class="note">左端は「オレンジ部位」「内部メカ」など<b>色のまとまり</b>で自由に名付け。カード画像はこの行ごとにまとまります。列見出しの<b>⠿</b>ドラッグで列の入れ替え、<b>セルをドラッグ</b>で他の行へコピー。</span>
   </div>
 </div>
 
@@ -466,7 +468,7 @@ td.rowphoto{text-align:center;vertical-align:middle}
     <button id="shareX">Xで共有</button>
   </div>
   <div class="savedlist" id="savedList"></div>
-  <p class="note" style="margin-top:8px">URLを開くと閲覧ページが表示されます(上部のタブで編集に切り替え可)。端末保存はブラウザ内のみなので、大事なレシピはURLかバックアップを残してください。</p>
+  <p class="note" style="margin-top:8px">端末保存はこのブラウザ内のみです。大事なレシピは共有URLを控えておいてください。</p>
 </div>
 
 <footer>PaintLog — 記載の商品名は各社の商標です。当サイトはAmazonアソシエイト等のアフィリエイトリンクを含みます。</footer>
@@ -1891,13 +1893,11 @@ function renderViewMode(){
         const p = c.i !== undefined ? PAINTS[c.i] : null;
         const buyName = p ? (p[0]+" "+p[1]+" "+p[2]).replace(/\s+/g," ").trim() : c.c;
         html += `<td class="vr-cell" data-label="${esc(proc.name)}">
-          <div class="vrecipe-chip-line">
-            <span class="vrecipe-chip" style="background:${p?p[3]:'#ddd'}"></span>
-            <span>
-              <span class="vrecipe-pname">${esc(p?p[2]:c.c)}</span>
-              <span class="vrecipe-pcode">${p?esc((p[0]+" "+p[1]).trim()):""}</span>
-            </span>
-          </div>
+          <span class="vrecipe-chip" style="background:${p?p[3]:'#ddd'}"></span>
+          <span class="vrecipe-name">
+            <span class="vrecipe-pname">${esc(p?p[2]:c.c)}</span>
+            <span class="vrecipe-pcode">${p?esc((p[0]+" "+p[1]).trim()):""}</span>
+          </span>
           <div class="vr-buylinks">
             <a class="buy amazon" target="_blank" rel="nofollow noopener" href="${amazonUrl(buyName)}">Amazon</a>
             <a class="buy rakuten" target="_blank" rel="nofollow noopener" href="${rakutenUrl(buyName)}">楽天</a>
