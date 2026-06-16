@@ -1509,14 +1509,13 @@ document.getElementById("copyUrl").onclick = async (e) => {
 };
 document.getElementById("shareX").onclick = async (e) => {
   const btn = e.currentTarget; const old = btn.textContent; btn.disabled = true; btn.textContent = "保存中…";
-  const w = window.open("about:blank", "_blank");   // ポップアップブロック回避のため先に開く
   try {
     const { url } = await saveToServer();
     const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
     const tw = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
-    if (w) w.location.href = tw; else window.open(tw, "_blank");
-  } catch (_) { if (w) w.close(); alert("保存に失敗しました。もう一度お試しください。"); }
-  finally { btn.disabled = false; btn.textContent = old; }
+    // 中間タブを挟まず現在のタブをそのままX intentへ遷移 → スマホはXアプリ(ログイン済み)が起動
+    window.location.href = tw;
+  } catch (_) { alert("保存に失敗しました。もう一度お試しください。"); btn.disabled = false; btn.textContent = old; }
 };
 
 /* ===================== レシピカード画像(D案:写真メイン+色グループ) ===================== */
