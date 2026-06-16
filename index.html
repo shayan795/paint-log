@@ -248,7 +248,7 @@ footer{text-align:center;font-size:.72rem;color:var(--sub);margin-top:26px}
 .about-hero .ah-logo{font-size:2.1rem;font-weight:700;letter-spacing:.12em;display:inline-flex;align-items:center;gap:12px}
 .about-hero .ah-logo::before{content:"";width:18px;height:18px;background:var(--accent);border-radius:50%}
 .about-hero .ah-tag{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:var(--sub);margin-top:10px}
-.about-lead{font-size:1.05rem;line-height:1.9;margin:26px 0;font-weight:500}
+.about-lead{font-size:1.12rem;line-height:1.95;margin:28px auto;font-weight:500;text-align:center;max-width:30em}
 .share-tweet-btn{display:inline-block;font-family:inherit;font-size:.95rem;font-weight:700;padding:11px 22px;background:#000;color:#fff;border-radius:10px;text-decoration:none;cursor:pointer}
 .share-tweet-btn:hover{background:#222}
 #shareReady{margin:4px 0 2px;padding:12px;border:1px solid var(--line-d);border-left:3px solid var(--accent);background:#fff}
@@ -1522,7 +1522,7 @@ document.getElementById("copyUrl").onclick = async (e) => {
 };
 let _shareUrl = null;
 function tweetIntent(url){
-  const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨 #ガンプラ`;
+  const text = `「${state.kit || "ガンプラ"}」の塗装レシピ🎨\n#塗装レシピ録 #ガンプラ`;
   return "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url);
 }
 // 共有対象の中身が変わったか判定するための署名
